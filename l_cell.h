@@ -1,8 +1,6 @@
 #ifndef PROJET_C_L2_L_CELL_H
 #define PROJET_C_L2_L_CELL_H
 
-#include <stdlib.h>
-
 typedef struct l_cell
 {
     int value;

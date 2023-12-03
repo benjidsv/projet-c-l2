@@ -1,5 +1,6 @@
 #include "l_list.h"
-#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
 
 l_list *MakeEmptyList(int maxLevels) {
     l_list *newList = malloc(sizeof(l_list) + maxLevels * sizeof(l_cell));
@@ -12,14 +13,25 @@ l_list *MakeEmptyList(int maxLevels) {
     return newList;
 }
 
-l_cell *GetCellFromIndex(l_list *list, int i) {
-    l_cell *next = list->heads[0];
-    while (i > 0) {
-        next = next->next[0];
-        i--;
+l_list *MakeBigList(int n) {
+    int cellCount = (int)pow(2, n) - 1;
+    int middle = (int)(cellCount/2);
+    int level = 1;
+    l_list *newList = MakeEmptyList(n);
+
+    for (int i = 1; i <= cellCount; ++i) {
+        l_cell *cell;
+        if (i % 2 == 0) {
+            level += i > middle + 1? -1 : 1;
+            cell = MakeCell(i, level);
+        }
+        else {
+            cell = MakeCell(i, 1); // Si le chiffre est impair le niveau est 1
+        }
+        InsertCell(newList, cell);
     }
 
-    return next;
+    return newList;
 }
 
 int SkipColumnWhilePrinting(l_list *list, int index, int value) {
@@ -131,12 +143,48 @@ void PrintListLevel(l_list *list, int level) {
             j++;
             continue;
         }
-        else printf("> [ %d | @-] --", next->value);
+        else printf("> [ %.2d | @-] --", next->value);
         next = next->next[level];
         j++;
     }
 
     printf("> NULL\n");
+}
+
+l_cell *SearchValueLevel0(l_list *list, int value) {
+    l_cell *next = list->heads[0];
+    while (next != NULL) {
+        if (next->value == value) break;
+        next = next->next[0];
+    }
+
+    return next;
+}
+
+l_cell *SearchValue(l_list *list, int value) {
+    int level = list->maxLevels - 1;
+    l_cell *next = list->heads[level];
+    l_cell *lastInferior = next;
+
+    for (; level >= 0; --level) {
+        if (lastInferior->value <= value) {
+            while (next != NULL) {
+                if (next->value == value) return next;
+                if (next->value > value) break;
+
+                lastInferior = next;
+                next = next->next[level];
+            }
+
+            next = lastInferior;
+        }
+        else {
+            next = list->heads[level - 1];
+            lastInferior = next;
+        }
+    }
+
+    return NULL;
 }
 
 
