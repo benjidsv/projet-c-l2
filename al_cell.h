@@ -5,7 +5,7 @@
 
 typedef struct al_cell
 {
-    int level;
+    //int level;
     entry value;
     struct al_cell *next[];
 } al_cell;

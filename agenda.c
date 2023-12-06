@@ -80,3 +80,13 @@ entry *MakeEntry(contact c) {
 
     return new;
 }
+
+int CompareDates(t_date date, t_date other) {
+    if (date.year == other.year) {
+        if (date.month == other.month) {
+            return date.day > other.day;
+        }
+        return date.month > other.month;
+    }
+    return date.year > other.year;
+}

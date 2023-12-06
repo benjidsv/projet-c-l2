@@ -48,5 +48,6 @@ typedef struct entry {
 } entry;
 
 entry *MakeEntry(contact c);
+int CompareDates(t_date date, t_date other);
 
 #endif //PROJET_C_L2_AGENDA_H

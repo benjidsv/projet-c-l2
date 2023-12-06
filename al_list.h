@@ -12,17 +12,17 @@ typedef struct al_list
 
 al_list *MakeEmptyList(int maxLevels);
 
-al_list *MakeBigList(int n);
+void InsertCell(al_list *list, al_cell *cell, int raccord);
 
-void InsertCell(al_list *list, al_cell *cell);
+void RaccordCells(al_list *list);
 
 void PrintListLevel(al_list *list, int level);
 
 void PrintList(al_list *list);
 
-al_cell *SearchValueLevel0(al_list *list, entry value);
+al_cell *SearchValueLevel0(al_list *list, char* value);
 
-al_cell *SearchValue(al_list *list, entry value);
+al_cell *SearchValue(al_list *list, char* value);
 
 
 #endif //PROJET_C_L2_AL_LIST_H

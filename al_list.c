@@ -29,7 +29,14 @@ int CompareKeys(const char *key, const char *other) {
     return strlen(key) > strlen(other);
 }
 
-int SkipColumnWhilePrinting(al_list *list, int index, entry value) {
+int NumberOfSameLetters(const char *key, const char *other) {
+    int i = 0;
+    while (key[i] != '\0' && other[i] != '\0' && key[i] == other[i]) i++;
+
+    return i;
+}
+
+int SkipColumnWhilePrinting(al_list *list, int index, entry value, char **retval) {
     al_cell *next = list->heads[0];
     int j = 0;
     while (j < index) {
@@ -39,6 +46,7 @@ int SkipColumnWhilePrinting(al_list *list, int index, entry value) {
     }
 
     if (next == NULL) return 0;
+    *retval = next->value.c.key;
     return strcmp(next->value.c.key, value.c.key);
 }
 
@@ -48,29 +56,79 @@ void PrintList(al_list *list) {
     }
 }
 
-void InsertCell(al_list *list, al_cell *cell) {
-    // On limite le niveau de la cellule pour ne pas dépasser celui de la liste
-    if (cell->level > list->maxLevels) cell->level = list->maxLevels;
 
+void RaccordCells(al_list *list) {
+    // On efface le raccordement précédent
+    al_cell *next = list->heads[0];
+    while (next != NULL) {
+        for (int i = 1; i < list->maxLevels; ++i) {
+            next->next[i] = NULL;
+        }
+        next = next->next[0];
+    }
+
+    for (int level = 1; level < list->maxLevels; ++level) {
+        // On met la première valeur à tous les niveaux
+        list->heads[level] = list->heads[0];
+    }
+
+    next = list->heads[3];
+    // On raccorde les lettres différentes
+    while (next != NULL) {
+        if (next->next[3] == NULL) {
+            al_cell *next0 = next;
+            while (next0 != NULL && next0->value.c.key[0] == next->value.c.key[0]) next0 = next0->next[0];
+            if (next0 == NULL) break;
+            next->next[3] = next0;
+        }
+        next = next->next[3];
+    }
+
+
+    next = list->heads[2];
+    // On raccorde le niveau 2
+    while (next != NULL) {
+        if (next->next[2] == NULL) {
+            al_cell *next0 = next->next[0];
+            while (next0 != NULL && NumberOfSameLetters(next->value.c.key, next0->value.c.key) != 1)
+                next0 = next0->next[0];
+            if (next0 == NULL) break;
+            next->next[2] = next0;
+        }
+        next = next->next[2];
+    }
+
+    next = list->heads[1];
+    // On raccorde le niveau 1
+    while (next != NULL) {
+        if (next->next[1] == NULL) {
+            al_cell *next0 = next->next[0];
+            while (next0 != NULL && NumberOfSameLetters(next->value.c.key, next0->value.c.key) != 2)
+                next0 = next0->next[0];
+            if (next0 == NULL) break;
+            next->next[1] = next0;
+        }
+        next = next->next[1];
+    }
+}
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "misc-no-recursion"
+// on peut ignorer ce warning car il est impossible que la fonction soit appellée récursivement plus d'une fois
+void InsertCell(al_list *list, al_cell *cell, int raccord) {
+    int position = 0;
     // Cas ou la liste est vide
     if (list->heads[0] == NULL) {
-        for (int i = 0; i < cell->level; ++i) {
-            list->heads[i] = cell;
-        }
+        list->heads[0] = cell;
+        RaccordCells(list);
         return;
     }
 
     // Cas ou il n'y a qu'un élément
     if (list->heads[0]->next[0] == NULL) {
         if (CompareKeys(cell->value.c.key, list->heads[0]->value.c.key)) {
-            // On lie à la cellule précédente
-            for (int i = 0; i < cell->level && i < list->heads[0]->level; ++i) {
-                list->heads[i]->next[i] = cell;
-            }
-            // On lie le reste aux têtes
-            for (int i = list->heads[0]->level; i < cell->level; ++i) {
-                list->heads[i] = cell;
-            }
+            list->heads[0]->next[0] = cell;
+            if (raccord) RaccordCells(list);
             return;
         }
 
@@ -79,56 +137,32 @@ void InsertCell(al_list *list, al_cell *cell) {
         for (int i = 0; i < list->maxLevels; ++i) {
             list->heads[i] = NULL;
         }
-        InsertCell(list, cell); // On insère notre cellule en premier
-        InsertCell(list, cell2);
+        InsertCell(list, cell, raccord); // On insère notre cellule en premier
+        InsertCell(list, cell2, raccord);
         return;
     }
 
     // On détermine ou insérer la cellule dans la liste (par ordre croissant)
     al_cell *insertionPoint = list->heads[0];
     // On doit l'insérer en tête
-
     if (CompareKeys(insertionPoint->value.c.key, cell->value.c.key)) {
-        for (int i = 0; i < cell->level; ++i) {
-            list->heads[i] = cell;
-            if (i < insertionPoint->level) cell->next[i] = insertionPoint;
-        }
-
+        cell->next[0] = list->heads[0];
+        list->heads[0] = cell;
+        if (raccord) RaccordCells(list);
         return;
     }
 
     while (insertionPoint->next[0] != NULL) {
-        if (CompareKeys(insertionPoint->value.c.key, cell->value.c.key)) break;
+        if (CompareKeys(insertionPoint->next[0]->value.c.key, cell->value.c.key)) break;
         insertionPoint = insertionPoint->next[0];
     }
 
-    // On lie aux cellules précédentes et suivantes s'il y en a
-    for (int i = 0; i < cell->level && i < insertionPoint->level; ++i) {
-        cell->next[i] = insertionPoint->next[i];
-        insertionPoint->next[i] = cell;
-    }
-    // On lie le reste aux têtes / aux cellules passerelles
-    for (int i = insertionPoint->level; i < cell->level; ++i) {
-        // On parcoure chaque niveau concerné et on trouve le dernier élément (c'est là qu'on doit lier)
-        al_cell *next = list->heads[i];
-        if (next == NULL) {
-            // Le niveau est vide
-            list->heads[i] = cell;
-            continue;
-        }
+    if (insertionPoint->next[0] != NULL) cell->next[0] = insertionPoint->next[0];
+    insertionPoint->next[0] = cell;
 
-        if (CompareKeys(next->value.c.key, cell->value.c.key)) {
-            list->heads[i] = cell;
-            cell->next[i] = next;
-            continue;
-        }
-        while (next->next[i] != NULL) {
-            next = next->next[i];
-        }
-
-        next->next[i] = cell;
-    }
+    if (raccord) RaccordCells(list);
 }
+#pragma clang diagnostic pop
 
 void PrintListLevel(al_list *list, int level) {
     printf("[ H%d @-] --", level);
@@ -136,8 +170,9 @@ void PrintListLevel(al_list *list, int level) {
     al_cell *next = list->heads[level];
     int j = 0;
     while (next != NULL) {
-        if (SkipColumnWhilePrinting(list, j, next->value)) {
-            printf("---------------");
+        char *retval = "";
+        if (SkipColumnWhilePrinting(list, j, next->value, &retval)) {
+            for (int i = 0; i < 13 + strlen(retval); ++i) putchar('-');
             j++;
             continue;
         }
@@ -150,26 +185,27 @@ void PrintListLevel(al_list *list, int level) {
     printf("> NULL\n");
 }
 
-al_cell *SearchValueLevel0(al_list *list, entry value) {
+al_cell *SearchValueLevel0(al_list *list, char *value) {
     al_cell *next = list->heads[0];
     while (next != NULL) {
-        if (next->value.c.key[0] == value.c.key[0]) break;
+        if (!strcmp(next->value.c.key, value)) break;
         next = next->next[0];
     }
 
     return next;
 }
 
-al_cell *SearchValue(al_list *list, entry value) {
+al_cell *SearchValue(al_list *list, char* value) {
     int level = list->maxLevels - 1;
     al_cell *next = list->heads[level];
     al_cell *lastInferior = next;
 
     for (; level >= 0; --level) {
-        if (lastInferior->value.c.key[0] <= value.c.key[0]) {
+        if (CompareKeys(lastInferior->value.c.key, value)) {
             while (next != NULL) {
-                if (next->value.c.key[0] == value.c.key[0]) return next;
-                if (next->value.c.key[0] > value.c.key[0]) break;
+                if (!strcmp(next->value.c.key, value)) return next;
+                if (strcasestr(next->value.c.key, value)) return next;
+                if (CompareKeys(next->value.c.key, value)) break;
 
                 lastInferior = next;
                 next = next->next[level];
