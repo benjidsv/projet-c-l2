@@ -64,6 +64,7 @@ void InsertCell(l_list *list, l_cell *cell) {
         }
         return;
     }
+
     // Cas ou il n'y a qu'un élément
     if (list->heads[0]->next[0] == NULL) {
         if (cell->value > list->heads[0]->value) {
@@ -143,7 +144,8 @@ void PrintListLevel(l_list *list, int level) {
             j++;
             continue;
         }
-        else printf("> [ %.2d | @-] --", next->value);
+
+        printf("> [ %.2d | @-] --", next->value);
         next = next->next[level];
         j++;
     }
