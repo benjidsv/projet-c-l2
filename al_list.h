@@ -20,9 +20,9 @@ void PrintListLevel(al_list *list, int level);
 
 void PrintList(al_list *list);
 
-al_cell *SearchValueLevel0(al_list *list, int value);
+al_cell *SearchValueLevel0(al_list *list, entry value);
 
-al_cell *SearchValue(al_list *list, int value);
+al_cell *SearchValue(al_list *list, entry value);
 
 
 #endif //PROJET_C_L2_AL_LIST_H

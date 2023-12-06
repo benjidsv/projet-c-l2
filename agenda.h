@@ -6,6 +6,7 @@ char *ScanString(int bufferSize);
 typedef struct contact {
     char *name;
     char *firstName;
+    char *key;
 } contact;
 
 contact *MakeContact(char *name, char *firstName);
@@ -39,9 +40,13 @@ typedef struct r_cell {
     struct r_cell *next;
 } r_cell;
 
+r_cell *MakeRCell(rdv r);
+
 typedef struct entry {
     contact c;
-    r_cell **rdvs;
+    r_cell *rdvs;
 } entry;
+
+entry *MakeEntry(contact c);
 
 #endif //PROJET_C_L2_AGENDA_H

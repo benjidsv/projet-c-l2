@@ -1,6 +1,7 @@
 #include "al_list.h"
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
 al_list *MakeEmptyList(int maxLevels) {
     al_list *newList = malloc(sizeof(al_list) + maxLevels * sizeof(al_cell));
@@ -13,28 +14,22 @@ al_list *MakeEmptyList(int maxLevels) {
     return newList;
 }
 
-al_list *MakeBigList(int n) {
-    int cellCount = (int)pow(2, n) - 1;
-    int middle = (int)(cellCount/2);
-    int level = 1;
-    al_list *newList = MakeEmptyList(n);
+// Retourne 1 pour key > other (plus loin dans l'alphabet)
+int CompareKeys(const char *key, const char *other) {
+    if (!strcmp(key, other)) return -1; // Si les chaînes sont égales
 
-    for (int i = 1; i <= cellCount; ++i) {
-        al_cell *cell;
-        if (i % 2 == 0) {
-            level += i > middle + 1? -1 : 1;
-            cell = MakeCell(i, level);
-        }
-        else {
-            cell = MakeCell(i, 1); // Si le chiffre est impair le niveau est 1
-        }
-        InsertCell(newList, cell);
+    int i = 0;
+    while (key[i] != '\0' && other[i] != '\0') {
+        if (key[i] > other[i]) return 1;
+        if (key[i] < other[i]) return 0;
+        i++;
     }
-
-    return newList;
+    // Si on est ici les clés ont les mêmes caractères mais une des clés est plus longue
+    // Dans ce cas celle qui est plus longue est la plus grande (plus loin dans l'alphabet)
+    return strlen(key) > strlen(other);
 }
 
-int SkipColumnWhilePrinting(al_list *list, int index, int value) {
+int SkipColumnWhilePrinting(al_list *list, int index, entry value) {
     al_cell *next = list->heads[0];
     int j = 0;
     while (j < index) {
@@ -44,7 +39,7 @@ int SkipColumnWhilePrinting(al_list *list, int index, int value) {
     }
 
     if (next == NULL) return 0;
-    return next->value != value;
+    return strcmp(next->value.c.key, value.c.key);
 }
 
 void PrintList(al_list *list) {
@@ -67,7 +62,7 @@ void InsertCell(al_list *list, al_cell *cell) {
 
     // Cas ou il n'y a qu'un élément
     if (list->heads[0]->next[0] == NULL) {
-        if (cell->value > list->heads[0]->value) {
+        if (CompareKeys(cell->value.c.key, list->heads[0]->value.c.key)) {
             // On lie à la cellule précédente
             for (int i = 0; i < cell->level && i < list->heads[0]->level; ++i) {
                 list->heads[i]->next[i] = cell;
@@ -92,7 +87,8 @@ void InsertCell(al_list *list, al_cell *cell) {
     // On détermine ou insérer la cellule dans la liste (par ordre croissant)
     al_cell *insertionPoint = list->heads[0];
     // On doit l'insérer en tête
-    if (insertionPoint->value > cell->value) {
+
+    if (CompareKeys(insertionPoint->value.c.key, cell->value.c.key)) {
         for (int i = 0; i < cell->level; ++i) {
             list->heads[i] = cell;
             if (i < insertionPoint->level) cell->next[i] = insertionPoint;
@@ -102,7 +98,7 @@ void InsertCell(al_list *list, al_cell *cell) {
     }
 
     while (insertionPoint->next[0] != NULL) {
-        if (insertionPoint->next[0]->value > cell->value) break;
+        if (CompareKeys(insertionPoint->value.c.key, cell->value.c.key)) break;
         insertionPoint = insertionPoint->next[0];
     }
 
@@ -120,7 +116,8 @@ void InsertCell(al_list *list, al_cell *cell) {
             list->heads[i] = cell;
             continue;
         }
-        if (next->value > cell->value) {
+
+        if (CompareKeys(next->value.c.key, cell->value.c.key)) {
             list->heads[i] = cell;
             cell->next[i] = next;
             continue;
@@ -145,7 +142,7 @@ void PrintListLevel(al_list *list, int level) {
             continue;
         }
 
-        printf("> [ %.2d | @-] --", next->value);
+        printf("> [ %s | @-] --", next->value.c.key);
         next = next->next[level];
         j++;
     }
@@ -153,26 +150,26 @@ void PrintListLevel(al_list *list, int level) {
     printf("> NULL\n");
 }
 
-al_cell *SearchValueLevel0(al_list *list, int value) {
+al_cell *SearchValueLevel0(al_list *list, entry value) {
     al_cell *next = list->heads[0];
     while (next != NULL) {
-        if (next->value == value) break;
+        if (next->value.c.key[0] == value.c.key[0]) break;
         next = next->next[0];
     }
 
     return next;
 }
 
-al_cell *SearchValue(al_list *list, int value) {
+al_cell *SearchValue(al_list *list, entry value) {
     int level = list->maxLevels - 1;
     al_cell *next = list->heads[level];
     al_cell *lastInferior = next;
 
     for (; level >= 0; --level) {
-        if (lastInferior->value <= value) {
+        if (lastInferior->value.c.key[0] <= value.c.key[0]) {
             while (next != NULL) {
-                if (next->value == value) return next;
-                if (next->value > value) break;
+                if (next->value.c.key[0] == value.c.key[0]) return next;
+                if (next->value.c.key[0] > value.c.key[0]) break;
 
                 lastInferior = next;
                 next = next->next[level];

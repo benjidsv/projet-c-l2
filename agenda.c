@@ -23,6 +23,18 @@ contact *MakeContact(char *name, char *firstName) {
     new->name = name;
     new->firstName = firstName;
 
+    int nameLength = 0;
+    while (name[nameLength] != '\0') nameLength++;
+
+    int firstNameLength = 0;
+    while (name[firstNameLength] != '\0') firstNameLength++;
+
+    new->key = malloc(nameLength + firstNameLength + 1); // +1 pour le _
+    strcat(new->key, name);
+    strcat(new->key, "_");
+    strcat(new->key, firstName);
+    for (int i = 0; i < nameLength + firstNameLength + 1; ++i) new->key[i] = tolower(new->key[i]);
+
     return new;
 }
 
@@ -49,6 +61,22 @@ rdv *MakeRDV(t_date date, t_time time, t_time duration, char *topic) {
     new->time = time;
     new->duration = duration;
     new->topic = topic;
+
+    return new;
+}
+
+r_cell *MakeRCell(rdv r) {
+    r_cell *new = malloc(sizeof(r_cell));
+    new->r = r;
+    new->next = NULL;
+
+    return new;
+}
+
+entry *MakeEntry(contact c) {
+    entry *new = malloc(sizeof(entry));
+    new->c = c;
+    new->rdvs = NULL;
 
     return new;
 }

@@ -10,6 +10,6 @@ typedef struct al_cell
     struct al_cell *next[];
 } al_cell;
 
-al_cell *MakeCell(int val, int lvl);
+al_cell *MakeCell(entry val);
 
 #endif //PROJET_C_L2_AL_CELL_H
