@@ -1,8 +1,8 @@
-#include "l_cell.h"
+#include "al_cell.h"
 #include <stdlib.h>
 
-l_cell *MakeCell(int val, int lvl) {
-    l_cell *newCell = malloc(sizeof(l_cell) + sizeof(l_cell*) * lvl);
+al_cell *MakeCell(int val, int lvl) {
+    al_cell *newCell = malloc(sizeof(al_cell) + sizeof(al_cell*) * lvl);
     newCell->value = val;
     newCell->level = lvl;
     for (int i = 0; i < lvl; ++i) {

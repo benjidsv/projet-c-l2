@@ -1,9 +1,9 @@
-#include "l_list.h"
+#include "al_list.h"
 #include <math.h>
 #include <stdlib.h>
 
-l_list *MakeEmptyList(int maxLevels) {
-    l_list *newList = malloc(sizeof(l_list) + maxLevels * sizeof(l_cell));
+al_list *MakeEmptyList(int maxLevels) {
+    al_list *newList = malloc(sizeof(al_list) + maxLevels * sizeof(al_cell));
     newList->maxLevels = maxLevels;
 
     for (int i = 0; i < maxLevels; ++i) {
@@ -13,14 +13,14 @@ l_list *MakeEmptyList(int maxLevels) {
     return newList;
 }
 
-l_list *MakeBigList(int n) {
+al_list *MakeBigList(int n) {
     int cellCount = (int)pow(2, n) - 1;
     int middle = (int)(cellCount/2);
     int level = 1;
-    l_list *newList = MakeEmptyList(n);
+    al_list *newList = MakeEmptyList(n);
 
     for (int i = 1; i <= cellCount; ++i) {
-        l_cell *cell;
+        al_cell *cell;
         if (i % 2 == 0) {
             level += i > middle + 1? -1 : 1;
             cell = MakeCell(i, level);
@@ -34,8 +34,8 @@ l_list *MakeBigList(int n) {
     return newList;
 }
 
-int SkipColumnWhilePrinting(l_list *list, int index, int value) {
-    l_cell *next = list->heads[0];
+int SkipColumnWhilePrinting(al_list *list, int index, int value) {
+    al_cell *next = list->heads[0];
     int j = 0;
     while (j < index) {
         if (next == NULL) return 0;
@@ -47,13 +47,13 @@ int SkipColumnWhilePrinting(l_list *list, int index, int value) {
     return next->value != value;
 }
 
-void PrintList(l_list *list) {
+void PrintList(al_list *list) {
     for (int i = 0; i < list->maxLevels ; ++i) {
         PrintListLevel(list, i);
     }
 }
 
-void InsertCell(l_list *list, l_cell *cell) {
+void InsertCell(al_list *list, al_cell *cell) {
     // On limite le niveau de la cellule pour ne pas dépasser celui de la liste
     if (cell->level > list->maxLevels) cell->level = list->maxLevels;
 
@@ -80,7 +80,7 @@ void InsertCell(l_list *list, l_cell *cell) {
         }
 
         // Si on doit faire l'inverse on peut simplement vider la liste et y remettre les éléments dans l'odre inverse
-        l_cell *cell2 = list->heads[0];
+        al_cell *cell2 = list->heads[0];
         for (int i = 0; i < list->maxLevels; ++i) {
             list->heads[i] = NULL;
         }
@@ -90,7 +90,7 @@ void InsertCell(l_list *list, l_cell *cell) {
     }
 
     // On détermine ou insérer la cellule dans la liste (par ordre croissant)
-    l_cell *insertionPoint = list->heads[0];
+    al_cell *insertionPoint = list->heads[0];
     // On doit l'insérer en tête
     if (insertionPoint->value > cell->value) {
         for (int i = 0; i < cell->level; ++i) {
@@ -114,7 +114,7 @@ void InsertCell(l_list *list, l_cell *cell) {
     // On lie le reste aux têtes / aux cellules passerelles
     for (int i = insertionPoint->level; i < cell->level; ++i) {
         // On parcoure chaque niveau concerné et on trouve le dernier élément (c'est là qu'on doit lier)
-        l_cell *next = list->heads[i];
+        al_cell *next = list->heads[i];
         if (next == NULL) {
             // Le niveau est vide
             list->heads[i] = cell;
@@ -133,10 +133,10 @@ void InsertCell(l_list *list, l_cell *cell) {
     }
 }
 
-void PrintListLevel(l_list *list, int level) {
+void PrintListLevel(al_list *list, int level) {
     printf("[ H%d @-] --", level);
 
-    l_cell *next = list->heads[level];
+    al_cell *next = list->heads[level];
     int j = 0;
     while (next != NULL) {
         if (SkipColumnWhilePrinting(list, j, next->value)) {
@@ -153,8 +153,8 @@ void PrintListLevel(l_list *list, int level) {
     printf("> NULL\n");
 }
 
-l_cell *SearchValueLevel0(l_list *list, int value) {
-    l_cell *next = list->heads[0];
+al_cell *SearchValueLevel0(al_list *list, int value) {
+    al_cell *next = list->heads[0];
     while (next != NULL) {
         if (next->value == value) break;
         next = next->next[0];
@@ -163,10 +163,10 @@ l_cell *SearchValueLevel0(l_list *list, int value) {
     return next;
 }
 
-l_cell *SearchValue(l_list *list, int value) {
+al_cell *SearchValue(al_list *list, int value) {
     int level = list->maxLevels - 1;
-    l_cell *next = list->heads[level];
-    l_cell *lastInferior = next;
+    al_cell *next = list->heads[level];
+    al_cell *lastInferior = next;
 
     for (; level >= 0; --level) {
         if (lastInferior->value <= value) {

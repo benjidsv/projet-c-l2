@@ -1,13 +1,15 @@
-#ifndef PROJET_C_L2_L_CELL_H
-#define PROJET_C_L2_L_CELL_H
+#ifndef PROJET_C_L2_AL_CELL_H
+#define PROJET_C_L2_AL_CELL_H
 
-typedef struct l_cell
+#include "agenda.h"
+
+typedef struct al_cell
 {
-    int value;
     int level;
-    struct l_cell *next[]
-} l_cell;
+    entry value;
+    struct al_cell *next[];
+} al_cell;
 
-l_cell *MakeCell(int val, int lvl);
+al_cell *MakeCell(int val, int lvl);
 
-#endif //PROJET_C_L2_L_CELL_H
+#endif //PROJET_C_L2_AL_CELL_H

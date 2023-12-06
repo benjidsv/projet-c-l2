@@ -1,28 +1,28 @@
-#ifndef PROJET_C_L2_L_LIST_H
-#define PROJET_C_L2_L_LIST_H
+#ifndef PROJET_C_L2_AL_LIST_H
+#define PROJET_C_L2_AL_LIST_H
 
-#include "l_cell.h"
+#include "al_cell.h"
 #include <stdio.h>
 
-typedef struct l_list
+typedef struct al_list
 {
     int maxLevels;
-    l_cell * heads[];
-} l_list;
+    al_cell * heads[];
+} al_list;
 
-l_list *MakeEmptyList(int maxLevels);
+al_list *MakeEmptyList(int maxLevels);
 
-l_list *MakeBigList(int n);
+al_list *MakeBigList(int n);
 
-void InsertCell(l_list *list, l_cell *cell);
+void InsertCell(al_list *list, al_cell *cell);
 
-void PrintListLevel(l_list *list, int level);
+void PrintListLevel(al_list *list, int level);
 
-void PrintList(l_list *list);
+void PrintList(al_list *list);
 
-l_cell *SearchValueLevel0(l_list *list, int value);
+al_cell *SearchValueLevel0(al_list *list, int value);
 
-l_cell *SearchValue(l_list *list, int value);
+al_cell *SearchValue(al_list *list, int value);
 
 
-#endif //PROJET_C_L2_L_LIST_H
+#endif //PROJET_C_L2_AL_LIST_H
