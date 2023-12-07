@@ -5,6 +5,7 @@
 
 
 void Partie1() {
+    // Crée une liste d'exemple et l'affiche
     l_list *list = MakeEmptyList(5);
 
     // Insertion en tête
@@ -29,6 +30,7 @@ void Partie1() {
 }
 
 void Partie2(int nMax) {
+    // Execute des recherches dans la liste et mesure le temps que ça prend pour comparer
     for (int n = 3; n < nMax; ++n) {
         srand(time(0));
         int valueToSearch = rand() % ((int)pow(2, n) - 1) + 1;

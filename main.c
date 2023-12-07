@@ -150,14 +150,6 @@ void CreateContact() {
     InsertCell(list, cell, 1);
 }
 
-void LoadFile() {
-
-}
-
-void SaveFile() {
-
-}
-
 int main() {
     printf("Gestionnaire d'agenda - Benjamin Arbousset, Johan Dao Duy, Wassim Amrani\n");
     list = ExampleList();
@@ -175,12 +167,6 @@ int main() {
                 break;
             case 2:
                 CreateContact();
-                break;
-            case 3:
-                LoadFile();
-                break;
-            case 4:
-                SaveFile();
                 break;
             default:
                 exit(0);

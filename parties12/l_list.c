@@ -13,6 +13,7 @@ l_list *MakeEmptyList(int maxLevels) {
     return newList;
 }
 
+// Remplis une liste de n niveaux avec 2^n - 1 valeurs
 l_list *MakeBigList(int n) {
     int cellCount = (int)pow(2, n) - 1;
     int middle = (int)(cellCount/2);
@@ -37,6 +38,8 @@ l_list *MakeBigList(int n) {
 int SkipColumnWhilePrinting(l_list *list, int index, int value) {
     l_cell *next = list->heads[0];
     int j = 0;
+    // On regarde les autres niveaux au même indice pour savoir si on doit afficher la cellule ou attendre
+    // Si la valeur correspond à tous les niveaux on affiche la cellule, sinon on skip
     while (j < index) {
         if (next == NULL) return 0;
         next = next->next[0];
@@ -168,11 +171,14 @@ l_cell *SearchValue(l_list *list, int value) {
     l_cell *next = list->heads[level];
     l_cell *lastInferior = next;
 
+    // Pour chaque niveaux
     for (; level >= 0; --level) {
+        // On parcoure la liste jusqu'à soit trouver la bonne valeur et la reetourner ou une valeur supérieure auquel
+        // cas on passe au niveau suivant en retenant la plus grande cellule inférieure à celle qu'on cherche (lastInferior)
         if (lastInferior->value <= value) {
             while (next != NULL) {
-                if (next->value == value) return next;
-                if (next->value > value) break;
+                if (next->value == value) return next; // bonne valeur
+                if (next->value > value) break; // valeur supérieure (on passe au niveau suivant
 
                 lastInferior = next;
                 next = next->next[level];
