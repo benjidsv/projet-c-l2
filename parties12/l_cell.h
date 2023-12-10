@@ -5,7 +5,7 @@ typedef struct l_cell
 {
     int value;
     int level;
-    struct l_cell *next[]
+    struct l_cell *next[];
 } l_cell;
 
 l_cell *MakeCell(int val, int lvl);
